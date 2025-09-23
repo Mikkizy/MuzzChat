@@ -18,7 +18,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ChatViewModel @Inject constructor(
-    private val getMessagesUseCase: GetMessagesUseCase,
+    getMessagesUseCase: GetMessagesUseCase,
     private val sendMessageUseCase: SendMessageUseCase,
     private val markMessagesAsReadUseCase: MarkMessagesAsReadUseCase,
     private val userRepository: UserRepository

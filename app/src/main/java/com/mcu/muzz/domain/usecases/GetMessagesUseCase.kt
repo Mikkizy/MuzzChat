@@ -23,7 +23,7 @@ class GetMessagesUseCase @Inject constructor(
         if (messages.isEmpty()) return emptyList()
 
         val groups = mutableListOf<MessageGroup>()
-        var currentGroup = mutableListOf<Message>()
+        val currentGroup = mutableListOf<Message>()
         var lastMessage: Message? = null
 
         messages.forEach { message ->

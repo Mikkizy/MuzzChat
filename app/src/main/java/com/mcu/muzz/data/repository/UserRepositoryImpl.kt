@@ -25,7 +25,7 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun initializeUsers() {
         val users = listOf(
             UserEntity(id = "user1", name = "Sarah"),
-            UserEntity(id = "user2", name = "John")
+            UserEntity(id = "user2", name = "Miracle")
         )
         userDao.insertUsers(users)
     }
