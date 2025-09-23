@@ -1,44 +1,9 @@
 package com.mcu.muzzchat.presentation.utils
 
 import com.mcu.muzzchat.domain.models.Message
-import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.DayOfWeek
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.minus
-import kotlinx.datetime.toLocalDateTime
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
-
-@OptIn(ExperimentalTime::class)
-fun formatMessageTime(timestamp: Instant): String {
-    val now = Clock.System.now()
-    val messageTime = timestamp.toLocalDateTime(TimeZone.currentSystemDefault())
-    val currentTime = now.toLocalDateTime(TimeZone.currentSystemDefault())
-
-    val messageDate = messageTime.date
-    val currentDate = currentTime.date
-
-    return when {
-        messageDate == currentDate -> "Today"
-        messageDate == currentDate.minus(1, DateTimeUnit.DAY) -> "Yesterday"
-        else -> {
-            val dayOfWeek = messageDate.dayOfWeek
-            when (dayOfWeek) {
-                DayOfWeek.MONDAY -> "Monday"
-                DayOfWeek.TUESDAY -> "Tuesday"
-                DayOfWeek.WEDNESDAY -> "Wednesday"
-                DayOfWeek.THURSDAY -> "Thursday"
-                DayOfWeek.FRIDAY -> "Friday"
-                DayOfWeek.SATURDAY -> "Saturday"
-                DayOfWeek.SUNDAY -> "Sunday"
-            }
-        }
-    } + " ${messageTime.hour.toString().padStart(2, '0')}:${messageTime.minute.toString().padStart(2, '0')}"
-}
 
 sealed class MessageItem {
     data class Section(val text: String) : MessageItem()

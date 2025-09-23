@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -25,8 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -98,7 +96,7 @@ fun ChatScreen(
         ChatTopBar(
             userName = stringResource(id = R.string.default_contact_name),
             onBackClick = onBackClick,
-            onMoreClick = { /* Handle more options */ }
+            onMoreClick = { /* Does nothing for this case. */ }
         )
 
         // Messages List
@@ -147,9 +145,6 @@ fun ChatScreen(
                     .testTag("messageInput")
                     .imePadding(),
                 enabled = true,
-                placeholder = {
-                    Text(text = stringResource(R.string.message_hint))
-                },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
                 keyboardActions = KeyboardActions(
                     onSend = {
@@ -168,8 +163,6 @@ fun ChatScreen(
                 ),
             )
 
-            //Spacer(modifier = Modifier.width(8.dp))
-
             Box(
                 modifier = Modifier
                     .clip(CircleShape)
@@ -186,7 +179,7 @@ fun ChatScreen(
                     enabled = uiState.currentMessage.isNotBlank()
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Send,
+                        imageVector = Icons.AutoMirrored.Filled.Send,
                         contentDescription = stringResource(id = R.string.send_message),
                         tint = Color.White
                     )
@@ -197,15 +190,13 @@ fun ChatScreen(
 }
 
 @Composable
-private fun SectionHeader(text: String) { // text is like "Thursday 11:59"
+private fun SectionHeader(text: String) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
     ) {
         val annotatedString = buildAnnotatedString {
-            // Assuming the format is always "DayOfWeek HH:mm"
-            // Find the last space, which separates the day from the time
             val lastSpaceIndex = text.lastIndexOf(' ')
 
             if (lastSpaceIndex != -1 && lastSpaceIndex < text.length - 1) {
@@ -215,20 +206,19 @@ private fun SectionHeader(text: String) { // text is like "Thursday 11:59"
                 // Style for the Day part
                 withStyle(
                     style = SpanStyle(
-                        color = LightGray, // Custom Dark Gray
-                        fontWeight = FontWeight.Bold // Bold
+                        color = LightGray,
+                        fontWeight = FontWeight.Bold
                     )
                 ) {
                     append(dayPart)
                 }
 
-                append(" ") // Add the space back
+                append(" ")
 
                 // Style for the Time part
                 withStyle(
                     style = SpanStyle(
-                        color = LightGray // Custom Light Gray
-                        // fontWeight = FontWeight.Normal (default)
+                        color = LightGray
                     )
                 ) {
                     append(timePart)
@@ -250,11 +240,8 @@ private fun SectionHeader(text: String) { // text is like "Thursday 11:59"
         Text(
             text = annotatedString,
             modifier = Modifier.align(Alignment.Center),
-            // You can keep some base styling here, or let AnnotatedString fully control
             style = MaterialTheme.typography.bodySmall.copy(
-                // These will be overridden by SpanStyle for color/fontWeight where specified
-                // color = MaterialTheme.colorScheme.onSurfaceVariant,
-                // fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Normal
             ),
             textAlign = TextAlign.Center
         )
@@ -272,8 +259,7 @@ private fun MessageBubbleGroup(
         messages.forEachIndexed { index, message ->
             MessageBubble(
                 message = message,
-                isFromCurrentUser = isFromCurrentUser,
-                isLast = index == messages.size - 1
+                isFromCurrentUser = isFromCurrentUser
             )
 
             if (index < messages.size - 1) {
@@ -288,8 +274,7 @@ private fun MessageBubbleGroup(
 @Composable
 private fun MessageBubble(
     message: Message,
-    isFromCurrentUser: Boolean,
-    isLast: Boolean
+    isFromCurrentUser: Boolean
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -308,10 +293,8 @@ private fun MessageBubble(
                 ),
             colors = CardDefaults.cardColors(
                 containerColor = if (isFromCurrentUser) {
-                    //MaterialTheme.colorScheme.primary
                     MessageBubbleSent
                 } else {
-                    //MaterialTheme.colorScheme.surfaceVariant
                     MessageBubbleReceived
                 }
             ),
@@ -322,17 +305,6 @@ private fun MessageBubble(
                 bottomEnd = if (isFromCurrentUser ) 1.dp else 12.dp
             )
         ) {
-            /*Text(
-                text = message.text,
-                modifier = Modifier.padding(12.dp),
-                color = if (isFromCurrentUser) {
-                    MaterialTheme.colorScheme.onPrimary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
-                style = MaterialTheme.typography.bodyMedium
-            )*/
-            // Use SubcomposeLayout to measure Text then size the Icon Row
             Box(
                 modifier = Modifier.padding(10.dp)
             ) {
@@ -348,15 +320,15 @@ private fun MessageBubble(
                             },
                             style = MaterialTheme.typography.bodyMedium
                         )
-                    }[0].measure(constraints) // Measure with incoming constraints (from Card)
+                    }[0].measure(constraints)
 
                     // Second Pass: Measure the Icon Row using the Text's width
                     val iconRowPlaceable = subcompose("iconRow") {
-                        if (isFromCurrentUser) { // Only show icon row for current user
+                        if (isFromCurrentUser) {
                             Row(
                                 modifier = Modifier
-                                    .padding(top = 4.dp), // Padding between text and icon
-                                horizontalArrangement = Arrangement.End, // Align icon to the end of this Row
+                                    .padding(top = 4.dp),
+                                horizontalArrangement = Arrangement.End,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(
@@ -369,16 +341,6 @@ private fun MessageBubble(
                                     tint = if (message.isRead) Yellow else LightGray,
                                     modifier = Modifier.size(12.dp)
                                 )
-                                /*if (message.isRead) {
-                                    Icon(
-                                        imageVector = Icons.Default.Done,
-                                        contentDescription = stringResource(R.string.message_read),
-                                        tint = Color(0xFF4CAF50),
-                                        modifier = Modifier
-                                            .size(12.dp)
-                                            .offset(x = (-4).dp)
-                                    )
-                                }*/
                             }
                         }
                     }.map {
@@ -391,10 +353,8 @@ private fun MessageBubble(
                             if (isFromCurrentUser && iconRowPlaceable.isNotEmpty()) 4.dp.roundToPx() else 0 // Add padding if iconRow exists
 
                     layout(textPlaceable.width, totalHeight) {
-                        // Place the Text
                         textPlaceable.placeRelative(0, 0)
 
-                        // Place the Icon Row below the Text
                         iconRowPlaceable.firstOrNull()?.placeRelative(
                             0,
                             textPlaceable.height + if (isFromCurrentUser) 4.dp.roundToPx() else 0

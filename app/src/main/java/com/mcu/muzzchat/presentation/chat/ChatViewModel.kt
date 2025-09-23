@@ -10,8 +10,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -73,22 +71,6 @@ class ChatViewModel @Inject constructor(
                     markMessagesAsReadUseCase(message.id)
                 }
             }
-        }
-    }
-
-    fun sendOtherUserMessage(message: String) {
-        if (message.isBlank()) return
-
-        viewModelScope.launch {
-            sendMessageUseCase(message, false)
-            // Auto-mark other user messages as read after a delay
-            markMessagesAsReadUseCase.markAllAsRead()
-        }
-    }
-
-    fun markMessageAsRead(messageId: Long) {
-        viewModelScope.launch {
-            markMessagesAsReadUseCase(messageId)
         }
     }
 }
