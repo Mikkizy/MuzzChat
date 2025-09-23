@@ -15,7 +15,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.mcu.muzzchat"
+        applicationId = "com.mcu.muzz"
         minSdk = 30
         targetSdk = 36
         versionCode = 1
