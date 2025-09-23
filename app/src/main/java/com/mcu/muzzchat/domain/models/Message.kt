@@ -10,5 +10,6 @@ data class Message(
     val id: Long = 0,
     val text: String,
     val timestamp: LocalDateTime,
-    val isFromCurrentUser: Boolean
+    val isFromCurrentUser: Boolean,
+    val isRead: Boolean = false
 )

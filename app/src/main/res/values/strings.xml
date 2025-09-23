@@ -24,4 +24,6 @@
     <string name="sarah">Sarah</string>
     <string name="chat_title">Chat</string>
     <string name="message_hint">Type a message…</string>
+    <string name="message_read">Message Read</string>
+    <string name="message_delivered">Message Delivered</string>
 </resources>

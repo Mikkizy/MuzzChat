@@ -13,5 +13,6 @@ data class MessageEntity(
     val id: Long = 0,
     val text: String,
     val timestamp: String, // Stored as ISO string for Room compatibility
-    val isFromCurrentUser: Boolean
+    val isFromCurrentUser: Boolean,
+    val isRead: Boolean = false
 )

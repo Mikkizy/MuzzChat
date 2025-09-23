@@ -7,4 +7,6 @@ interface MessageRepository {
     fun getAllMessages(): Flow<List<Message>>
     suspend fun insertMessage(message: Message)
     suspend fun deleteAllMessages()
+    suspend fun markMessageAsRead(messageId: Long)
+    suspend fun markAllMessagesAsRead()
 }

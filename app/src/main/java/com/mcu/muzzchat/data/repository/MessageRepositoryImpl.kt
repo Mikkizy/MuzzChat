@@ -25,4 +25,12 @@ class MessageRepositoryImpl @Inject constructor(
     override suspend fun deleteAllMessages() {
         messageDao.deleteAllMessages()
     }
+
+    override suspend fun markMessageAsRead(messageId: Long) {
+        messageDao.markMessageAsRead(messageId)
+    }
+
+    override suspend fun markAllMessagesAsRead() {
+        messageDao.markAllMessagesAsRead()
+    }
 }

@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -22,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -32,8 +35,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,8 +42,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -50,6 +53,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -62,6 +66,7 @@ import com.mcu.muzzchat.presentation.ui.theme.MessageBubbleReceived
 import com.mcu.muzzchat.presentation.ui.theme.MessageBubbleSent
 import com.mcu.muzzchat.presentation.ui.theme.PrimaryPink
 import com.mcu.muzzchat.presentation.ui.theme.SecondaryPink
+import com.mcu.muzzchat.presentation.ui.theme.Yellow
 import com.mcu.muzzchat.presentation.utils.MessageItem
 import com.mcu.muzzchat.presentation.utils.groupMessagesWithSections
 
@@ -89,17 +94,6 @@ fun ChatScreen(
             .background(MaterialTheme.colorScheme.background)
     ) {
         // Top Bar
-//        TopAppBar(
-//            title = {
-//                Text(
-//                    text = stringResource(R.string.chat_title),
-//                    style = MaterialTheme.typography.titleLarge
-//                )
-//            },
-//            colors = TopAppBarDefaults.topAppBarColors(
-//                containerColor = MaterialTheme.colorScheme.primaryContainer
-//            )
-//        )
         ChatTopBar(
             userName = stringResource(id = R.string.default_contact_name),
             onBackClick = onBackClick,
@@ -134,14 +128,6 @@ fun ChatScreen(
         }
 
         // Input Area
-//        Card(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(8.dp),
-//            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-//        ) {
-//
-//        }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -332,7 +318,7 @@ private fun MessageBubble(
                 bottomEnd = if (isFromCurrentUser ) 1.dp else 12.dp
             )
         ) {
-            Text(
+            /*Text(
                 text = message.text,
                 modifier = Modifier.padding(12.dp),
                 color = if (isFromCurrentUser) {
@@ -341,7 +327,77 @@ private fun MessageBubble(
                     MaterialTheme.colorScheme.onSurfaceVariant
                 },
                 style = MaterialTheme.typography.bodyMedium
-            )
+            )*/
+            // Use SubcomposeLayout to measure Text then size the Icon Row
+            Box(
+                modifier = Modifier.padding(10.dp)
+            ) {
+                SubcomposeLayout { constraints ->
+                    // First Pass: Measure the Text content
+                    val textPlaceable = subcompose("text") {
+                        Text(
+                            text = message.text,
+                            color = if (isFromCurrentUser) {
+                                MaterialTheme.colorScheme.onPrimary
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            },
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }[0].measure(constraints) // Measure with incoming constraints (from Card)
+
+                    // Second Pass: Measure the Icon Row using the Text's width
+                    val iconRowPlaceable = subcompose("iconRow") {
+                        if (isFromCurrentUser) { // Only show icon row for current user
+                            Row(
+                                modifier = Modifier
+                                    .padding(top = 4.dp), // Padding between text and icon
+                                horizontalArrangement = Arrangement.End, // Align icon to the end of this Row
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_done_all),
+                                    contentDescription = if (message.isRead) {
+                                        stringResource(R.string.message_read)
+                                    } else {
+                                        stringResource(R.string.message_delivered)
+                                    },
+                                    tint = if (message.isRead) Yellow else LightGray,
+                                    modifier = Modifier.size(12.dp)
+                                )
+                                /*if (message.isRead) {
+                                    Icon(
+                                        imageVector = Icons.Default.Done,
+                                        contentDescription = stringResource(R.string.message_read),
+                                        tint = Color(0xFF4CAF50),
+                                        modifier = Modifier
+                                            .size(12.dp)
+                                            .offset(x = (-4).dp)
+                                    )
+                                }*/
+                            }
+                        }
+                    }.map {
+                        // Constrain the width of the icon Row to be exactly the width of the Text
+                        it.measure(Constraints.fixedWidth(textPlaceable.width))
+                    }
+
+                    // Calculate the total height needed
+                    val totalHeight = textPlaceable.height + (iconRowPlaceable.firstOrNull()?.height ?: 0) +
+                            if (isFromCurrentUser && iconRowPlaceable.isNotEmpty()) 4.dp.roundToPx() else 0 // Add padding if iconRow exists
+
+                    layout(textPlaceable.width, totalHeight) {
+                        // Place the Text
+                        textPlaceable.placeRelative(0, 0)
+
+                        // Place the Icon Row below the Text
+                        iconRowPlaceable.firstOrNull()?.placeRelative(
+                            0,
+                            textPlaceable.height + if (isFromCurrentUser) 4.dp.roundToPx() else 0
+                        )
+                    }
+                }
+            }
         }
 
         if (isFromCurrentUser) {
@@ -349,3 +405,4 @@ private fun MessageBubble(
         }
     }
 }
+

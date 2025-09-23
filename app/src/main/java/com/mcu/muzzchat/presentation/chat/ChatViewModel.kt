@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mcu.muzzchat.domain.usecases.GenerateAutoReplyUseCase
 import com.mcu.muzzchat.domain.usecases.GetMessagesUseCase
+import com.mcu.muzzchat.domain.usecases.MarkMessagesAsReadUseCase
 import com.mcu.muzzchat.domain.usecases.SendMessageUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +19,8 @@ import javax.inject.Inject
 class ChatViewModel @Inject constructor(
     private val getMessagesUseCase: GetMessagesUseCase,
     private val sendMessageUseCase: SendMessageUseCase,
-    private val generateAutoReplyUseCase: GenerateAutoReplyUseCase
+    private val generateAutoReplyUseCase: GenerateAutoReplyUseCase,
+    private val markMessagesAsReadUseCase: MarkMessagesAsReadUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ChatUiState())
@@ -26,6 +28,7 @@ class ChatViewModel @Inject constructor(
 
     init {
         loadMessages()
+        markUnreadMessagesAsRead()
     }
 
     private fun loadMessages() {
@@ -33,6 +36,13 @@ class ChatViewModel @Inject constructor(
             getMessagesUseCase().collect { messages ->
                 _uiState.value = _uiState.value.copy(messages = messages)
             }
+        }
+    }
+
+    private fun markUnreadMessagesAsRead() {
+        viewModelScope.launch {
+            // Mark all other user's messages as read when app opens
+            markMessagesAsReadUseCase.markAllAsRead()
         }
     }
 
@@ -45,13 +55,23 @@ class ChatViewModel @Inject constructor(
         if (currentMessage.isBlank()) return
 
         viewModelScope.launch {
-            // Send user message
+            // Send user message (starts as unread)
             sendMessageUseCase(currentMessage, true)
             _uiState.value = _uiState.value.copy(currentMessage = "")
 
             // Generate auto-reply
             generateAutoReplyUseCase(currentMessage)?.let { reply ->
                 sendMessageUseCase(reply, false)
+
+                // Simulate the other user reading the current user's message
+                // Find the latest message from current user and mark as read
+                val latestUserMessage = _uiState.value.messages
+                    .filter { it.isFromCurrentUser }
+                    .maxByOrNull { it.timestamp }
+
+                latestUserMessage?.let { message ->
+                    markMessagesAsReadUseCase(message.id)
+                }
             }
         }
     }
@@ -61,6 +81,14 @@ class ChatViewModel @Inject constructor(
 
         viewModelScope.launch {
             sendMessageUseCase(message, false)
+            // Auto-mark other user messages as read after a delay
+            markMessagesAsReadUseCase.markAllAsRead()
+        }
+    }
+
+    fun markMessageAsRead(messageId: Long) {
+        viewModelScope.launch {
+            markMessagesAsReadUseCase(messageId)
         }
     }
 }
