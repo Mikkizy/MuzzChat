@@ -11,7 +11,7 @@ plugins {
 }
 
 android {
-    namespace = "com.mcu.muzzchat"
+    namespace = "com.mcu.muzz"
     compileSdk = 36
 
     defaultConfig {

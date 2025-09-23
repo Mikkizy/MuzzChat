@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "MuzzChat"
+rootProject.name = "Muzz"
 include(":app")
  

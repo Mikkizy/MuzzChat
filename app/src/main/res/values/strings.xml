@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MuzzChat</string>
+    <string name="app_name">Muzz</string>
     <string name="message_placeholder">Type a message…</string>
     <string name="send_message">Send message</string>
     <string name="back">Back</string>
