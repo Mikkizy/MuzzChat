@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -132,7 +133,8 @@ fun ChatScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.White)
-                .padding(16.dp),
+                .padding(16.dp)
+                .imePadding(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -142,7 +144,8 @@ fun ChatScreen(
                 shape = RoundedCornerShape(30.dp),
                 modifier = Modifier
                     .weight(1f)
-                    .testTag("messageInput"),
+                    .testTag("messageInput")
+                    .imePadding(),
                 enabled = true,
                 placeholder = {
                     Text(text = stringResource(R.string.message_hint))
@@ -165,11 +168,12 @@ fun ChatScreen(
                 ),
             )
 
-            Spacer(modifier = Modifier.width(8.dp))
+            //Spacer(modifier = Modifier.width(8.dp))
 
             Box(
                 modifier = Modifier
                     .clip(CircleShape)
+                    .imePadding()
                     .background(if (uiState.currentMessage.isNotBlank()) PrimaryPink else SecondaryPink),
                 contentAlignment = Alignment.Center
             ) {
