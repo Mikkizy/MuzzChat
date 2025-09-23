@@ -7,8 +7,9 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 data class Message(
-    val id: Long = 0,
-    val text: String,
+    val id: String,
+    val content: String,
+    val senderId: String,
     val timestamp: LocalDateTime,
-    val isFromCurrentUser: Boolean
+    val isRead: Boolean = false
 )

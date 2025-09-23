@@ -24,4 +24,9 @@
     <string name="sarah">Sarah</string>
     <string name="chat_title">Chat</string>
     <string name="message_hint">Type a message…</string>
+    <string name="unknown_user">Unknown User</string>
+    <string name="switch_user">Switch User</string>
+    <string name="message_read">Message Read</string>
+    <string name="message_sent">Message Sent</string>
+    <string name="type_message">Type Message...</string>
 </resources>

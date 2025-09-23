@@ -48,7 +48,7 @@ sealed class MessageItem {
     ) : MessageItem()
 }
 
-fun groupMessagesWithSections(messages: List<Message>): List<MessageItem> {
+/*fun groupMessagesWithSections(messages: List<Message>): List<MessageItem> {
     if (messages.isEmpty()) return emptyList()
 
     val result = mutableListOf<MessageItem>()
@@ -92,7 +92,7 @@ fun groupMessagesWithSections(messages: List<Message>): List<MessageItem> {
     }
 
     return result
-}
+}*/
 
 fun formatSectionHeader(timestamp: LocalDateTime): String {
     val dayFormatter = DateTimeFormatter.ofPattern("EEEE")

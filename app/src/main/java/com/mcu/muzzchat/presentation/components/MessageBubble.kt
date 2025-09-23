@@ -24,7 +24,7 @@ import com.mcu.muzzchat.presentation.ui.theme.MessageBubbleSent
 import com.mcu.muzzchat.presentation.ui.theme.MuzzChatTheme
 import java.time.LocalDateTime
 
-@Composable
+/*@Composable
 fun MessageBubble(
     message: Message,
     modifier: Modifier = Modifier
@@ -70,7 +70,7 @@ fun MessageBubble(
             )
         }
     }
-}
+}*/
 
 /*
 @Preview(showBackground = true)

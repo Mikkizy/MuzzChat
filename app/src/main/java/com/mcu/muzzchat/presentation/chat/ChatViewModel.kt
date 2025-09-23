@@ -2,15 +2,17 @@ package com.mcu.muzzchat.presentation.chat
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mcu.muzzchat.domain.usecases.GenerateAutoReplyUseCase
+import com.mcu.muzzchat.domain.repository.UserRepository
 import com.mcu.muzzchat.domain.usecases.GetMessagesUseCase
+import com.mcu.muzzchat.domain.usecases.MarkMessagesAsReadUseCase
 import com.mcu.muzzchat.domain.usecases.SendMessageUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -18,49 +20,93 @@ import javax.inject.Inject
 class ChatViewModel @Inject constructor(
     private val getMessagesUseCase: GetMessagesUseCase,
     private val sendMessageUseCase: SendMessageUseCase,
-    private val generateAutoReplyUseCase: GenerateAutoReplyUseCase
+    private val markMessagesAsReadUseCase: MarkMessagesAsReadUseCase,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(ChatUiState())
-    val uiState: StateFlow<ChatUiState> = _uiState.asStateFlow()
+    private val _currentUserId = MutableStateFlow("user1")
+    private val _messageText = MutableStateFlow("")
+    private val _isLoading = MutableStateFlow(false)
+    private val _error = MutableStateFlow<String?>(null)
+
+    val messageText: StateFlow<String> = _messageText.asStateFlow()
+
+    val uiState: StateFlow<ChatUIState> = combine(
+        getMessagesUseCase(),
+        userRepository.getAllUsers(),
+        _currentUserId,
+        _isLoading,
+        _error
+    ) { messages, users, currentUserId, isLoading, error ->
+        val currentUser = users.find { it.id == currentUserId }
+        val otherUser = users.find { it.id != currentUserId }
+
+        ChatUIState(
+            messages = messages,
+            currentUser = currentUser,
+            otherUser = otherUser,
+            isLoading = isLoading,
+            error = error
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = ChatUIState()
+    )
 
     init {
-        loadMessages()
+        initializeUsers()
+        markMessagesAsRead()
     }
 
-    private fun loadMessages() {
-        viewModelScope.launch {
-            getMessagesUseCase().collect { messages ->
-                _uiState.value = _uiState.value.copy(messages = messages)
-            }
-        }
-    }
-
-    fun updateCurrentMessage(message: String) {
-        _uiState.value = _uiState.value.copy(currentMessage = message)
+    fun onMessageTextChanged(text: String) {
+        _messageText.value = text
     }
 
     fun sendMessage() {
-        val currentMessage = _uiState.value.currentMessage.trim()
-        if (currentMessage.isBlank()) return
+        val content = _messageText.value
+        val senderId = _currentUserId.value
 
-        viewModelScope.launch {
-            // Send user message
-            sendMessageUseCase(currentMessage, true)
-            _uiState.value = _uiState.value.copy(currentMessage = "")
-
-            // Generate auto-reply
-            generateAutoReplyUseCase(currentMessage)?.let { reply ->
-                sendMessageUseCase(reply, false)
+        if (content.isNotBlank()) {
+            viewModelScope.launch {
+                try {
+                    sendMessageUseCase(content, senderId)
+                    _messageText.value = ""
+                    _error.value = null
+                } catch (e: Exception) {
+                    _error.value = e.localizedMessage
+                }
             }
         }
     }
 
-    fun sendOtherUserMessage(message: String) {
-        if (message.isBlank()) return
+    fun switchUser() {
+        val currentUser = _currentUserId.value
+        _currentUserId.value = if (currentUser == "user1") "user2" else "user1"
+        markMessagesAsRead()
+    }
 
+    fun clearError() {
+        _error.value = null
+    }
+
+    private fun initializeUsers() {
         viewModelScope.launch {
-            sendMessageUseCase(message, false)
+            try {
+                userRepository.initializeUsers()
+            } catch (e: Exception) {
+                _error.value = e.localizedMessage
+            }
+        }
+    }
+
+    private fun markMessagesAsRead() {
+        viewModelScope.launch {
+            try {
+                markMessagesAsReadUseCase(_currentUserId.value)
+            } catch (e: Exception) {
+                _error.value = e.localizedMessage
+            }
         }
     }
 }

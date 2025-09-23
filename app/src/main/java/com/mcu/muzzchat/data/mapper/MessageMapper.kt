@@ -4,7 +4,7 @@ import com.mcu.muzzchat.data.local.entity.MessageEntity
 import com.mcu.muzzchat.domain.models.Message
 import java.time.LocalDateTime
 
-fun MessageEntity.toDomain(): Message = Message(
+/*fun MessageEntity.toDomain(): Message = Message(
     id = id,
     text = text,
     timestamp = LocalDateTime.parse(timestamp),
@@ -16,4 +16,4 @@ fun Message.toEntity(): MessageEntity = MessageEntity(
     text = text,
     timestamp = timestamp.toString(),
     isFromCurrentUser = isFromCurrentUser
-)
+)*/

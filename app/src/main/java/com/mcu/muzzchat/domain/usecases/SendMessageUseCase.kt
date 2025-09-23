@@ -6,14 +6,11 @@ import java.time.LocalDateTime
 import javax.inject.Inject
 
 class SendMessageUseCase @Inject constructor(
-    private val repository: MessageRepository
+    private val messageRepository: MessageRepository
 ) {
-    suspend operator fun invoke(text: String, isFromCurrentUser: Boolean) {
-        val message = Message(
-            text = text,
-            timestamp = LocalDateTime.now(),
-            isFromCurrentUser = isFromCurrentUser
-        )
-        repository.insertMessage(message)
+    suspend operator fun invoke(content: String, senderId: String) {
+        if (content.isNotBlank()) {
+            messageRepository.sendMessage(content.trim(), senderId)
+        }
     }
 }

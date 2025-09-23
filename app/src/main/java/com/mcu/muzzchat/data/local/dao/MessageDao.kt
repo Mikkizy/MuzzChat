@@ -14,8 +14,14 @@ interface MessageDao {
     @Query("SELECT * FROM messages ORDER BY timestamp ASC")
     fun getAllMessages(): Flow<List<MessageEntity>>
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMessage(message: MessageEntity)
+
+    @Update
+    suspend fun updateMessage(message: MessageEntity)
+
+    @Query("UPDATE messages SET isRead = 1 WHERE senderId != :currentUserId AND isRead = 0")
+    suspend fun markMessagesAsRead(currentUserId: String)
 
     @Query("DELETE FROM messages")
     suspend fun deleteAllMessages()

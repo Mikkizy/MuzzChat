@@ -3,7 +3,8 @@ package com.mcu.muzzchat.di
 import android.content.Context
 import androidx.room.Room
 import com.mcu.muzzchat.data.local.dao.MessageDao
-import com.mcu.muzzchat.data.local.database.MessageDatabase
+import com.mcu.muzzchat.data.local.dao.UserDao
+import com.mcu.muzzchat.data.local.database.ChatDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,16 +18,21 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideChatDatabase(@ApplicationContext context: Context): MessageDatabase {
+    fun provideChatDatabase(@ApplicationContext context: Context): ChatDatabase {
         return Room.databaseBuilder(
             context,
-            MessageDatabase::class.java,
-            "chat_database"
+            ChatDatabase::class.java,
+            ChatDatabase.DATABASE_NAME
         ).build()
     }
 
     @Provides
-    fun provideMessageDao(database: MessageDatabase): MessageDao {
+    fun provideMessageDao(database: ChatDatabase): MessageDao {
         return database.messageDao()
+    }
+
+    @Provides
+    fun provideUserDao(database: ChatDatabase): UserDao {
+        return database.userDao()
     }
 }
