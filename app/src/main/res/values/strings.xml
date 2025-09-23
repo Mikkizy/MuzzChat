@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">MuzzChat</string>
+    <string name="message_placeholder">Type a message…</string>
+    <string name="send_message">Send message</string>
+    <string name="back">Back</string>
+    <string name="default_contact_name">Miracle</string>
+    <string name="loading_messages">Loading messages…</string>
+    <string name="error_sending_message">Failed to send message</string>
+    <string name="type_message_hint">Type a message…</string>
+    <string name="chat_with_user">Chat with %1$s</string>
+    <string name="back_button">Back</string>
+    <string name="more_options">More options</string>
+    <string name="message_sent_time">Sent at %1$s</string>
+    <string name="message_received_time">Received at %1$s</string>
+    <string name="today">Today</string>
+    <string name="yesterday">Yesterday</string>
+    <string name="monday">Monday</string>
+    <string name="tuesday">Tuesday</string>
+    <string name="wednesday">Wednesday</string>
+    <string name="thursday">Thursday</string>
+    <string name="friday">Friday</string>
+    <string name="saturday">Saturday</string>
+    <string name="sunday">Sunday</string>
+    <string name="sarah">Sarah</string>
+    <string name="chat_title">Chat</string>
+    <string name="message_hint">Type a message…</string>
+</resources>
