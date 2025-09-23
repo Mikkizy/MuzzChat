@@ -249,7 +249,6 @@ fun MessageInput(
             modifier = Modifier
                 .weight(1f)
                 .imePadding(),
-            placeholder = { Text(stringResource(R.string.type_message)) },
             shape = RoundedCornerShape(24.dp),
             maxLines = 4,
             colors = OutlinedTextFieldDefaults.colors(
