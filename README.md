@@ -1,6 +1,7 @@
 ## Muzz Chat Application
 
 A modern Android chat application built with Jetpack Compose, following Clean Architecture principles and implementing the requirements from the Muzz Android Exercise.
+
 **Note**: The "master" branch works similarly to the "toggleUser" branch for switching between users, while the "auto-reply-impl" branch simulates automatic responses.
 
 ### 🏗️ Architecture Overview
