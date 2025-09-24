@@ -73,4 +73,20 @@ class ChatViewModel @Inject constructor(
             }
         }
     }
+
+    fun sendOtherUserMessage(message: String) {
+        if (message.isBlank()) return
+
+        viewModelScope.launch {
+            sendMessageUseCase(message, false)
+            // Auto-mark other user messages as read after a delay
+            markMessagesAsReadUseCase.markAllAsRead()
+        }
+    }
+
+    fun markMessageAsRead(messageId: Long) {
+        viewModelScope.launch {
+            markMessagesAsReadUseCase(messageId)
+        }
+    }
 }

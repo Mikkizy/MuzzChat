@@ -51,12 +51,6 @@ fun ChatTopBar(
                         .background(PrimaryPink),
                     contentAlignment = Alignment.Center
                 ) {
-                    /*Text(
-                        text = userName.first().uppercase(),
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )*/
                     Image(
                         painter = painterResource(R.drawable.profile_pic),
                         contentDescription = "Profile Picture"

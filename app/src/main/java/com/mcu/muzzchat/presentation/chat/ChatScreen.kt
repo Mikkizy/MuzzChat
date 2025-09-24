@@ -6,16 +6,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -25,47 +20,31 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mcu.muzzchat.R
-import com.mcu.muzzchat.domain.models.Message
 import com.mcu.muzzchat.presentation.components.ChatTopBar
+import com.mcu.muzzchat.presentation.components.MessageBubbleGroup
+import com.mcu.muzzchat.presentation.components.SectionHeader
 import com.mcu.muzzchat.presentation.ui.theme.DarkGray
 import com.mcu.muzzchat.presentation.ui.theme.LightGray
-import com.mcu.muzzchat.presentation.ui.theme.MessageBubbleReceived
-import com.mcu.muzzchat.presentation.ui.theme.MessageBubbleSent
 import com.mcu.muzzchat.presentation.ui.theme.PrimaryPink
 import com.mcu.muzzchat.presentation.ui.theme.SecondaryPink
-import com.mcu.muzzchat.presentation.ui.theme.Yellow
 import com.mcu.muzzchat.presentation.utils.MessageItem
 import com.mcu.muzzchat.presentation.utils.groupMessagesWithSections
 
@@ -73,9 +52,10 @@ import com.mcu.muzzchat.presentation.utils.groupMessagesWithSections
 @Composable
 fun ChatScreen(
     onBackClick: () -> Unit,
-    viewModel: ChatViewModel = hiltViewModel()
+    uiState: ChatUiState,
+    updateCurrentMessage: (String) -> Unit,
+    sendMessage: () -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -138,7 +118,7 @@ fun ChatScreen(
         ) {
             OutlinedTextField(
                 value = uiState.currentMessage,
-                onValueChange = viewModel::updateCurrentMessage,
+                onValueChange = updateCurrentMessage,
                 shape = RoundedCornerShape(30.dp),
                 modifier = Modifier
                     .weight(1f)
@@ -148,7 +128,7 @@ fun ChatScreen(
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
                 keyboardActions = KeyboardActions(
                     onSend = {
-                        viewModel.sendMessage()
+                        sendMessage()
                         keyboardController?.hide()
                     }
                 ),
@@ -172,7 +152,7 @@ fun ChatScreen(
             ) {
                 IconButton(
                     onClick = {
-                        viewModel.sendMessage()
+                        sendMessage()
                         keyboardController?.hide()
                     },
                     modifier = Modifier.testTag("sendButton"),
@@ -185,187 +165,6 @@ fun ChatScreen(
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun SectionHeader(text: String) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-    ) {
-        val annotatedString = buildAnnotatedString {
-            val lastSpaceIndex = text.lastIndexOf(' ')
-
-            if (lastSpaceIndex != -1 && lastSpaceIndex < text.length - 1) {
-                val dayPart = text.substring(0, lastSpaceIndex)
-                val timePart = text.substring(lastSpaceIndex + 1)
-
-                // Style for the Day part
-                withStyle(
-                    style = SpanStyle(
-                        color = LightGray,
-                        fontWeight = FontWeight.Bold
-                    )
-                ) {
-                    append(dayPart)
-                }
-
-                append(" ")
-
-                // Style for the Time part
-                withStyle(
-                    style = SpanStyle(
-                        color = LightGray
-                    )
-                ) {
-                    append(timePart)
-                }
-            } else {
-                // Fallback if the format is unexpected, just append the original text
-                // with default section header styling
-                withStyle(
-                    style = SpanStyle(
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontWeight = FontWeight.Medium
-                    )
-                ) {
-                    append(text)
-                }
-            }
-        }
-
-        Text(
-            text = annotatedString,
-            modifier = Modifier.align(Alignment.Center),
-            style = MaterialTheme.typography.bodySmall.copy(
-                fontWeight = FontWeight.Normal
-            ),
-            textAlign = TextAlign.Center
-        )
-    }
-}
-
-@Composable
-private fun MessageBubbleGroup(
-    messages: List<Message>,
-    isFromCurrentUser: Boolean
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        messages.forEachIndexed { index, message ->
-            MessageBubble(
-                message = message,
-                isFromCurrentUser = isFromCurrentUser
-            )
-
-            if (index < messages.size - 1) {
-                Spacer(modifier = Modifier.height(2.dp))
-            } else {
-                Spacer(modifier = Modifier.height(3.dp))
-            }
-        }
-    }
-}
-
-@Composable
-private fun MessageBubble(
-    message: Message,
-    isFromCurrentUser: Boolean
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = if (isFromCurrentUser) Arrangement.End else Arrangement.Start
-    ) {
-        if (!isFromCurrentUser) {
-            Spacer(modifier = Modifier.width(8.dp))
-        }
-
-        Card(
-            modifier = Modifier
-                .widthIn(max = 280.dp)
-                .padding(
-                    start = if (isFromCurrentUser) 48.dp else 0.dp,
-                    end = if (!isFromCurrentUser) 48.dp else 0.dp
-                ),
-            colors = CardDefaults.cardColors(
-                containerColor = if (isFromCurrentUser) {
-                    MessageBubbleSent
-                } else {
-                    MessageBubbleReceived
-                }
-            ),
-            shape = RoundedCornerShape(
-                topStart = 12.dp,
-                topEnd = 12.dp,
-                bottomStart = if (!isFromCurrentUser ) 1.dp else 12.dp,
-                bottomEnd = if (isFromCurrentUser ) 1.dp else 12.dp
-            )
-        ) {
-            Box(
-                modifier = Modifier.padding(10.dp)
-            ) {
-                SubcomposeLayout { constraints ->
-                    // First Pass: Measure the Text content
-                    val textPlaceable = subcompose("text") {
-                        Text(
-                            text = message.text,
-                            color = if (isFromCurrentUser) {
-                                MaterialTheme.colorScheme.onPrimary
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            },
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }[0].measure(constraints)
-
-                    // Second Pass: Measure the Icon Row using the Text's width
-                    val iconRowPlaceable = subcompose("iconRow") {
-                        if (isFromCurrentUser) {
-                            Row(
-                                modifier = Modifier
-                                    .padding(top = 4.dp),
-                                horizontalArrangement = Arrangement.End,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_done_all),
-                                    contentDescription = if (message.isRead) {
-                                        stringResource(R.string.message_read)
-                                    } else {
-                                        stringResource(R.string.message_delivered)
-                                    },
-                                    tint = if (message.isRead) Yellow else LightGray,
-                                    modifier = Modifier.size(12.dp)
-                                )
-                            }
-                        }
-                    }.map {
-                        // Constrain the width of the icon Row to be exactly the width of the Text
-                        it.measure(Constraints.fixedWidth(textPlaceable.width))
-                    }
-
-                    // Calculate the total height needed
-                    val totalHeight = textPlaceable.height + (iconRowPlaceable.firstOrNull()?.height ?: 0) +
-                            if (isFromCurrentUser && iconRowPlaceable.isNotEmpty()) 4.dp.roundToPx() else 0 // Add padding if iconRow exists
-
-                    layout(textPlaceable.width, totalHeight) {
-                        textPlaceable.placeRelative(0, 0)
-
-                        iconRowPlaceable.firstOrNull()?.placeRelative(
-                            0,
-                            textPlaceable.height + if (isFromCurrentUser) 4.dp.roundToPx() else 0
-                        )
-                    }
-                }
-            }
-        }
-
-        if (isFromCurrentUser) {
-            Spacer(modifier = Modifier.width(8.dp))
         }
     }
 }
