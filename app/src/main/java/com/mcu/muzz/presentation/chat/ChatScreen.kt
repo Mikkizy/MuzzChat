@@ -37,8 +37,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mcu.muzz.R
 import com.mcu.muzz.presentation.components.MessageGroupItem
 import com.mcu.muzz.presentation.components.MessageInput
@@ -49,10 +47,13 @@ import com.mcu.muzz.presentation.ui.theme.PurpleGrey80
 @Composable
 fun ChatScreen(
     onBackClick: () -> Unit,
-    viewModel: ChatViewModel = hiltViewModel()
+    messageText: String,
+    uiState: ChatUIState,
+    switchUser: () -> Unit,
+    sendMessage: () -> Unit,
+    clearError: () -> Unit,
+    onMessageTextChanged: (String) -> Unit,
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val messageText by viewModel.messageText.collectAsStateWithLifecycle()
     var showDropdown by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
 
@@ -126,7 +127,8 @@ fun ChatScreen(
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.switch_user)) },
                             onClick = {
-                                viewModel.switchUser()
+                                //viewModel.switchUser()
+                                switchUser()
                                 showDropdown = false
                             }
                         )
@@ -156,15 +158,15 @@ fun ChatScreen(
         // Message Input TextField
         MessageInput(
             messageText = messageText,
-            onMessageTextChanged = viewModel::onMessageTextChanged,
-            onSendMessage = viewModel::sendMessage
+            onMessageTextChanged = onMessageTextChanged,
+            onSendMessage = sendMessage
         )
     }
 
     // Quick Error Handler
     uiState.error?.let { error ->
         LaunchedEffect(error) {
-            viewModel.clearError()
+            clearError()
         }
     }
 }
