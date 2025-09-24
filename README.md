@@ -2,6 +2,8 @@
 
 A modern Android chat application built with Jetpack Compose, following Clean Architecture principles and Android development best practices. This application demonstrates a real-time messaging interface with user switching capabilities, message read status indicators, and proper message grouping.
 
+**Note**: The "master" branch works similarly to the "toggleUser" branch for switching between users, while the "auto-reply-impl" branch simulates automatic responses.
+
 ## 📱 Features
 
 - **Real-time Messaging**: Send and receive messages with immediate UI updates
