@@ -4,11 +4,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -47,8 +50,9 @@ import com.mcu.muzzchat.presentation.ui.theme.PrimaryPink
 import com.mcu.muzzchat.presentation.ui.theme.SecondaryPink
 import com.mcu.muzzchat.presentation.utils.MessageItem
 import com.mcu.muzzchat.presentation.utils.groupMessagesWithSections
+import kotlinx.coroutines.delay
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun ChatScreen(
     onBackClick: () -> Unit,
@@ -59,9 +63,13 @@ fun ChatScreen(
     val listState = rememberLazyListState()
     val keyboardController = LocalSoftwareKeyboardController.current
 
+    // Track keyboard visibility
+    val isKeyboardVisible = WindowInsets.isImeVisible
+
     // Auto scroll to bottom when new messages arrive
-    LaunchedEffect(uiState.messages.size) {
+    LaunchedEffect(uiState.messages.size, isKeyboardVisible) {
         if (uiState.messages.isNotEmpty()) {
+            delay(100)
             listState.animateScrollToItem(uiState.messages.size - 1)
         }
     }
@@ -168,4 +176,3 @@ fun ChatScreen(
         }
     }
 }
-

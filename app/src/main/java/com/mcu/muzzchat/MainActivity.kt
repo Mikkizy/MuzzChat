@@ -17,6 +17,7 @@ import com.mcu.muzzchat.presentation.chat.ChatViewModel
 import com.mcu.muzzchat.presentation.ui.theme.MuzzChatTheme
 import dagger.hilt.android.AndroidEntryPoint
 
+@Suppress("DEPRECATION")
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
